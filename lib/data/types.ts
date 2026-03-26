@@ -51,7 +51,7 @@ export interface Movement {
   profileId: UUID;
   accountId: UUID;
   categoryId: UUID;
-  type: 'income' | 'expense' | 'transfer';
+  type: 'income' | 'expense' | 'transfer' | 'saving_deposit' | 'saving_withdrawal';
   amount: number;
   note?: string;
   happenedAt: string;

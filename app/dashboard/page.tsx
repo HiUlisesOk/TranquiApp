@@ -1,78 +1,89 @@
-"use client";
-
-import { useState } from "react";
 import { ModulePage } from "@/components/layout/module-page";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { type ViewState } from "@/types";
+import { buildDashboardMetrics, toneClassName } from "@/features/dashboard/domain";
+import { demoBudgets, demoCategories, demoMovements } from "@/lib/data/demo";
 
-const states: ViewState[] = ["empty", "loading", "error", "success"];
+const budget = demoBudgets[0];
+const metrics = buildDashboardMetrics({
+  budget,
+  movements: demoMovements,
+  categories: demoCategories,
+  previousMonthExpense: 470,
+});
+
+const metricCards = [
+  metrics.availableToSpend,
+  metrics.netSavings,
+  metrics.savingsRate,
+  metrics.consumedPercent,
+  metrics.monthlyComparison,
+];
 
 export default function DashboardPage() {
-  const [state, setState] = useState<ViewState>("success");
-
   return (
     <ModulePage
       title="Dashboard"
-      description="Visualizá ingresos, egresos y salud financiera en un solo lugar."
-      state={state}
+      description="Indicadores financieros calculados automáticamente desde tus movimientos y presupuesto."
+      state="success"
     >
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {metricCards.map((metric) => (
+          <Card key={metric.label}>
+            <CardHeader>
+              <CardDescription>{metric.label}</CardDescription>
+              <CardTitle>{metric.formatted}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Badge className={toneClassName[metric.tone]}>{metric.tone.toUpperCase()}</Badge>
+              <p className="text-xs text-muted-foreground">{metric.detail}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>Simulador de estados</CardTitle>
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">Cambiar estado</Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Seleccioná un estado de vista</DialogTitle>
-                <DialogDescription>Esto ayuda a validar vacíos, errores y carga.</DialogDescription>
-              </DialogHeader>
-              <div className="grid grid-cols-2 gap-2">
-                {states.map((option) => (
-                  <Button key={option} variant={state === option ? "default" : "outline"} onClick={() => setState(option)}>
-                    {option}
-                  </Button>
-                ))}
-              </div>
-            </DialogContent>
-          </Dialog>
+        <CardHeader>
+          <CardTitle>Alertas de presupuesto</CardTitle>
+          <CardDescription>
+            Gastos no planificados: {metrics.budget.unplannedExpenses.length} · Cobertura insuficiente:{" "}
+            {metrics.budget.insufficientCoverageItems.length}
+          </CardDescription>
         </CardHeader>
+        <CardContent className="flex flex-wrap gap-2">
+          <Badge className={metrics.budget.unplannedExpenses.length > 0 ? toneClassName.warning : toneClassName.success}>
+            No planificados: {metrics.budget.unplannedExpenses.length}
+          </Badge>
+          <Badge className={metrics.budget.insufficientCoverageItems.length > 0 ? toneClassName.danger : toneClassName.success}>
+            Pendientes por cobertura: {metrics.budget.insufficientCoverageItems.length}
+          </Badge>
+        </CardContent>
       </Card>
 
-      <Tabs defaultValue="hoy">
-        <TabsList>
-          <TabsTrigger value="hoy">Hoy</TabsTrigger>
-          <TabsTrigger value="semana">Semana</TabsTrigger>
-        </TabsList>
-        <TabsContent value="hoy">
+      <Card>
+        <CardHeader>
+          <CardTitle>Top categorías de gasto</CardTitle>
+        </CardHeader>
+        <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Concepto</TableHead>
-                <TableHead>Monto</TableHead>
+                <TableHead>Categoría</TableHead>
+                <TableHead>Gasto real</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>Gastos del día</TableCell>
-                <TableCell>$ 19.450</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Ingresos del día</TableCell>
-                <TableCell>$ 25.200</TableCell>
-              </TableRow>
+              {metrics.topCategories.map((category) => (
+                <TableRow key={category.categoryId}>
+                  <TableCell>{category.categoryName}</TableCell>
+                  <TableCell>${category.amount}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
-        </TabsContent>
-        <TabsContent value="semana">
-          <p className="text-sm text-muted-foreground">La tendencia semanal se ve estable. Seguís dentro del presupuesto.</p>
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </ModulePage>
   );
 }
