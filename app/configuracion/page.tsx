@@ -1,11 +1,14 @@
 import { ModulePage } from "@/components/layout/module-page";
+import { FinanceWorkspace } from "@/features/finance/forms";
 
-export default function ConfiguracionPage() {
+export default function Page() {
   return (
     <ModulePage
-      title="Configuración"
-      description="Ajustá moneda, idioma, notificaciones y reglas de seguridad de la cuenta."
+      title="Gestión financiera"
+      description="CRUD completo con React Hook Form + Zod para cuentas, categorías, presupuesto, movimientos, recurrentes y configuración."
       state="success"
-    />
+    >
+      <FinanceWorkspace />
+    </ModulePage>
   );
 }

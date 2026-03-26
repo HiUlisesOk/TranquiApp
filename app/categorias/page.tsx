@@ -1,11 +1,14 @@
 import { ModulePage } from "@/components/layout/module-page";
+import { FinanceWorkspace } from "@/features/finance/forms";
 
-export default function CategoriasPage() {
+export default function Page() {
   return (
     <ModulePage
-      title="Categorías"
-      description="Ordená tus gastos e ingresos con categorías personalizadas y colores."
-      state="error"
-    />
+      title="Gestión financiera"
+      description="CRUD completo con React Hook Form + Zod para cuentas, categorías, presupuesto, movimientos, recurrentes y configuración."
+      state="success"
+    >
+      <FinanceWorkspace />
+    </ModulePage>
   );
 }
