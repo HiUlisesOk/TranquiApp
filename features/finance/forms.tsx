@@ -24,6 +24,7 @@ import { RecentTransactionsCard } from "@/components/finance/RecentTransactionsC
 import { EmptyState } from "@/components/finance/EmptyState";
 import { CsvImportDialog } from "@/components/finance/CsvImportDialog";
 import { autoCategorize, defaultColumnMapping, detectDuplicates, parseCsv, validateRow, type CsvRow } from "@/features/finance/csv";
+import type { Movement } from "@/lib/data/types";
 
 const accountSchema = z.object({ name: z.string().min(2), type: z.enum(["checking", "savings", "cash", "credit"]), balance: z.coerce.number() });
 const categorySchema = z.object({ name: z.string().min(2), kind: z.enum(["income", "expense", "transfer"]) });
@@ -149,7 +150,7 @@ export function FinanceWorkspace() {
             </form></Form>
             <Button variant="outline" onClick={() => setCsvOpen(true)}>Importar CSV</Button>
             <CsvFlow open={csvOpen} onOpenChange={setCsvOpen} accounts={accountOptions} onImported={(rows) => {
-              const mapped = rows.map((row, idx) => ({
+              const mapped: Movement[] = rows.map((row, idx) => ({
                 id: `csv-${idx}-${crypto.randomUUID()}`,
                 profileId: "demo-user",
                 accountId: accounts[0]?.id ?? "acc-1",
